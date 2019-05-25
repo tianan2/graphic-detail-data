@@ -1,6 +1,8 @@
 ---
 title: "polity-conflict"
 output: html_document
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
@@ -14,6 +16,144 @@ theme_set(theme_light())
 conflict_years <- read_csv("data/2018-11-03-war-fighting/output_data/conflict_years_df.csv") %>% select(-X1)
 country_conflict_years <- read_csv("data/2018-11-03-war-fighting/output_data/country_conflict_years_df.csv") %>% select(-X1)
 maddison_polity_country_years <- read_csv("data/2018-11-03-war-fighting/output_data/maddison_and_polity_country_years_df.csv") %>% select(-X1)
-regression <- read_csv("data/2018-11-03-war-fighting/output_data/regression_df.csv")
+regression <- read_csv("data/2018-11-03-war-fighting/output_data/regression_df.csv") %>% select(-X1)
+```
+
+```{r}
+country_conflict_years %>% 
+  group_by(year, participant_region) %>% 
+  summarize(deaths_per_10000 = sum(year_deaths) / 10000) %>% 
+  ggplot(aes(year, deaths_per_100000)) +
+  geom_col(aes(fill = participant_region))
+```
+
+
+```{r}
+maddison_polity_country_years %>% 
+  group_by(year, country_name) %>% 
+  mutate(deaths_per_100000 = sum(country_year_conflict_deaths) / 100000) %>%
+  ungroup() %>% 
+  mutate(country_region = fct_relevel(country_region, "Europe", "Americas", "Asia", "Africa", "Middle East")) %>% 
+  ggplot(aes(year, deaths_per_100000)) +
+  geom_col(aes(fill = country_region), width = 5) +
+  labs(x = "Year", 
+       y = "Casualties per 100000", 
+       caption = "Data source: PRIOR, USDP, COW")
+```
+
+```{r}
+regression %>% 
+  ggplot(aes(country_democracy_scores, combined_polynomial_predicted_conflict_rate)) + 
+  geom_point() + 
+  geom_smooth(method = "loess", size = 2, color = "red") +
+  scale_y_continuous(labels = scales::percent_format()) +
+  labs(title = "Chance of fighting in a conflict", 
+       subtitle = "Shares of years in which a country suffered at least 100 combat deaths, 1900 - 2017", 
+       x = "Polity IV scores", 
+       y = "", 
+       caption = "Data source: PRIOR, USDP, POLITY, COW, The Economist")
+```
+
+```{r}
+regression %>% 
+  ggplot(aes(country_democracy_scores, combined_polynomial_predicted_conflict_rate)) + 
+  geom_point() + 
+  geom_smooth(method = "loess", size = 2, color = "red") + 
+  facet_wrap(~ country_region) +
+  scale_y_continuous(labels = scales::percent_format()) +
+  labs(title = "Robustness check by disaggregating region", 
+       x = "Polity IV scores", 
+       y = "", 
+       caption = "Data source: PRIOR, USDP, POLITY, COW, The Economist")
+```
+
+```{r}
+regression %>% 
+  mutate(period = ifelse(year > 1989, "Post-1989", "Pre-1989"), 
+         period = fct_relevel(period, "Pre-1989", "Post-1989")) %>% 
+  ggplot(aes(country_democracy_scores, third_order_democracy_predicted_conflict_rate)) + 
+  geom_point() + 
+  geom_smooth(method = "loess", size = 2, color = "red") + 
+  facet_wrap(~ period) +
+  scale_y_continuous(labels = scales::percent_format()) +
+  labs(title = "Robustness check by disaggregating period", 
+       x = "Polity IV scores", 
+       y = "", 
+       caption = "Data source: PRIOR, USDP, POLITY, COW, The Economist")
+```
+
+```{r}
+country_conflict_years_renamed <- country_conflict_years %>% rename("maddison_code" = "participant_maddison_code")
+
+regression %>% 
+  left_join(country_conflict_years_renamed, by = c("maddison_code", "year")) %>% 
+  filter(!is.na(state_conflict_type)) %>% 
+  mutate(conflict_type = ifelse(state_conflict_type == "Internal", state_conflict_type, "Interstate"),
+         conflict_type = fct_relevel(conflict_type, "Interstate", "Internal")) %>% 
+  ggplot(aes(country_democracy_scores, third_order_democracy_predicted_conflict_rate)) + 
+  geom_point() + 
+  geom_smooth(method = "loess", size = 2, color = "red") + 
+  facet_wrap(~ conflict_type) +
+  scale_y_continuous(labels = scales::percent_format()) +
+  labs(title = "Robustness check by disaggregating conflict type", 
+       x = "Polity IV scores", 
+       y = "", 
+       caption = "Data source: PRIOR, USDP, POLITY, COW, The Economist")
+```
+
+```{r}
+regression %>% 
+  ggplot(aes(log2_interpolated_gdp_per_capita, third_order_gdp_predicted_conflict_rate)) + 
+  geom_point() 
+```
+
+```{r}
+regression %>% 
+  ggplot(aes(log2_interpolated_gdp_per_capita, third_order_gdp_predicted_conflict_rate)) + 
+  geom_point() +
+  facet_wrap(~ country_region)
+```
+
+```{r}
+library(ggrepel)
+
+maddision_polity_2016 <- maddison_polity_country_years %>% 
+  filter(year == 2016)
+
+maddision_polity_2016_asia <- maddison_polity_country_years %>% 
+  filter(year == 2016, 
+         country_region == "Asia") 
+
+maddision_polity_2016_asia %>% 
+  ggplot(aes(gdp_per_capita, country_democracy_scores)) +
+  geom_point(color = "red") +
+  geom_smooth(method = "lm", se = FALSE, color = "orange") +
+  geom_text_repel(aes(label = country_name))
+
+asia_freedom_gdp <- read_excel("country_asia_freedom_gdp.xlsx")
+
+asia_freedom_gdp %>% 
+  ggplot(aes(gdp_per_capita_2017, freedom_scores)) +
+  geom_point(color = "red") +
+  geom_smooth(method = "lm", color = "orange", se = FALSE) + 
+  geom_text_repel(aes(label = country_name)) +
+  scale_x_log10() 
+
+maddision_polity_2016_asia %>% 
+  inner_join(asia_freedom_gdp, by = "country_name") %>% 
+  ggplot(aes(gdp_per_capita_2017, country_democracy_scores)) +
+  geom_point(color = "red") +
+  geom_text_repel(aes(label = country_name)) +
+  geom_smooth(data = maddision_polity_2016, aes(gdp_per_capita, country_democracy_scores), method = "lm", color = "orange", linetype = 2) +
+  scale_x_log10() 
+
+
+maddision_polity_2016_asia %>% 
+  ggplot(aes(gdp_per_capita, country_democracy_scores)) +
+  geom_point(color = "red") +
+  geom_text_repel(aes(label = country_name)) +
+  geom_smooth(data = maddision_polity_2016, aes(gdp_per_capita, country_democracy_scores), method = "lm", color = "orange", linetype = "dashed") + 
+  scale_x_log10() 
+  
 ```
 
