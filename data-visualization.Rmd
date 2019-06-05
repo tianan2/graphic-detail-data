@@ -1,0 +1,31 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+library(gapminder)
+theme_set(theme_light())
+options(scipen = 999)
+
+```
+
+```{r}
+gapminder %>% ggplot(aes(year, gdpPercap)) +
+  geom_line(aes(group = country), color = "gray70") + 
+  geom_smooth(size = 1.1, method = "loess", se = FALSE) +
+  facet_wrap(~ continent, ncol = 5) +
+  scale_y_log10(labels = scales::dollar)
+```
+```{r message=FALSE, warning=FALSE}
+library(survey)
+library(socviz)
+
+gss_sm
+```
+
