@@ -1,0 +1,47 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r message=TRUE, warning=TRUE}
+library(tidyverse)
+library(janitor)
+library(scales)
+theme_set(theme_light())
+options(scipen = 999)
+
+immigration_flow <- read_csv("oecd_immigration-flow_full.csv") %>% clean_names()
+```
+
+# Total of # of immigrants in 2016
+```{r}
+immigration_flow %>% 
+  filter(time == 2016) %>%
+  group_by(location) %>% 
+  summarize(total = sum(value)) %>%
+  ungroup() %>% 
+  mutate(location = fct_reorder(location, total)) %>% 
+  ggplot(aes(location, total)) +
+  geom_col() +
+  coord_flip() +
+  scale_y_continuous(labels = scales::comma_format()) +
+  labs(x = "", 
+       y = "")
+
+```
+
+```{r}
+immigration_flow %>% 
+  filter(location %in% c("JPN", "KOR"), 
+         time >= 2000) %>% 
+  group_by(location, time) %>% 
+  summarize(total = sum(value)) %>% 
+  ggplot(aes(time, total, color = location)) +
+  geom_point() +
+  geom_line()
+```
+

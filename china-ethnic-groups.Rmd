@@ -1,0 +1,40 @@
+---
+title: "Untitled"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+library(readxl)
+library(janitor)
+theme_set(theme_light())
+
+ethnic_pop <- read_excel("ethnic_minorities.xlsx") %>% clean_names() %>% 
+  rename("2010_pop" = "x2010population_b", 
+         "2000_pop" = "x2000population_b", 
+         "1990_pop" = "x1990population_b", 
+         "share_2010" = "x2010_national_shares")
+```
+
+```{r}
+ethnic_pop %>% mutate(diff = (`2010_pop` * 100) / `1990_pop`) %>% 
+  arrange(desc(share_2010)) %>% 
+  slice(1:10) %>% 
+  mutate(english_name = fct_reorder(english_name, diff)) %>% 
+  ggplot(aes(english_name, diff)) + 
+  geom_point(size = 2.5) + 
+  coord_flip() + 
+  scale_y_continuous(limits = c(100, 150), 
+                     labels = c("100(=1990)", "110", "120", "130", "140", "150")) +
+  labs(title = "Population size of China's 10 major ethnic groups in 2010",
+       subtitle = "1990 = 100", 
+       x = "", 
+       y = "")
+```
+

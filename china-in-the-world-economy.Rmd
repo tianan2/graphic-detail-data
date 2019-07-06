@@ -1,6 +1,8 @@
 ---
 title: "Untitled"
 output: html_document
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
@@ -16,6 +18,7 @@ history_gdp <- read_csv("data/2018-10-27_chinese-century/inputs/gdp.csv") %>% se
 maddison_regions <- read_csv("data/2018-11-03-war-fighting/source_data/maddison_economic_data/maddison_cleaned_regions.csv")
 ```
 
+# Gini coefficient
 ```{r}
 china_gini <- read_excel("china_gini-coefficient.xlsx")
 
@@ -35,5 +38,24 @@ china_gini %>%
 library(haven)
 
 gperc_w_China <- read_dta("gperc_w_China.dta")
+```
+
+```{r}
+library(tidyverse)
+library(janitor)
+
+youth_unemp <- read_csv("OECD_youth-unemployment_china.csv") %>% clean_names()
+
+youth_unemp %>% 
+  filter(time == 2018) %>% 
+  mutate(selected_countries = ifelse(location %in% c("JPN", "KOR", "CHN", "USA", "GBR", "EU28", "OECD"), "N", "Y")) %>% 
+  mutate(location = fct_reorder(location, value)) %>% 
+  ggplot(aes(location, value, fill = selected_countries)) + 
+  geom_col() +
+  theme(legend.position = "none") +
+  labs(title = "Distribution of Youth Unemployment rates in 2018", 
+       x = "", 
+       y = "Youth unemployment rates")
+  
 ```
 
