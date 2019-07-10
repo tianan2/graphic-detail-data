@@ -1,0 +1,31 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+library(scales)
+theme_set(theme_light())
+options(scipen = 999)
+
+taiwan_china <- read_csv("taiwan-china-trade.csv") 
+china_taiwan <- read_csv("china-trade-taiwan.csv") %>% mutate(pct_export = total_export_taiwan / total_export) %>% filter(year > 1998)
+```
+
+```{r}
+g <- taiwan_china %>% 
+  select(year, total_export, total_export_china) %>% 
+  filter(year > 1998) %>% 
+  mutate(pct_export = total_export_china / total_export) %>% 
+  ggplot(aes(year, pct_export)) +
+  geom_line(size = 1)
+  
+g + geom_line(data = china_taiwan, aes(year, pct_export), linetype = "dashed", size = 1) + scale_y_continuous(labels = percent_format()) + labs(title = "Figure. Uneven Reliance", subtitle = "Trade data shows Taiwan needs China more", x = "", y = "", caption = "Source: Ministry of Finance, ROC; China Statistics Yearbook")
+
+```
+
