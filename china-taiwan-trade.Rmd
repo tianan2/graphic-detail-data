@@ -1,6 +1,8 @@
 ---
 title: "Untitled"
 output: html_document
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
@@ -14,18 +16,40 @@ theme_set(theme_light())
 options(scipen = 999)
 
 taiwan_china <- read_csv("taiwan-china-trade.csv") 
-china_taiwan <- read_csv("china-trade-taiwan.csv") %>% mutate(pct_export = total_export_taiwan / total_export) %>% filter(year > 1998)
+china_taiwan <- read_csv("china-trade-taiwan.csv") %>% mutate(pct_china_export = total_export_taiwan / total_export) %>% filter(year > 1998)
 ```
 
 ```{r}
-g <- taiwan_china %>% 
+taiwan_china_pct <- taiwan_china %>% 
   select(year, total_export, total_export_china) %>% 
   filter(year > 1998) %>% 
-  mutate(pct_export = total_export_china / total_export) %>% 
-  ggplot(aes(year, pct_export)) +
-  geom_line(size = 1)
-  
-g + geom_line(data = china_taiwan, aes(year, pct_export), linetype = "dashed", size = 1) + scale_y_continuous(labels = percent_format()) + labs(title = "Figure. Uneven Reliance", subtitle = "Trade data shows Taiwan needs China more", x = "", y = "", caption = "Source: Ministry of Finance, ROC; China Statistics Yearbook")
+  mutate(pct_taiwan_export = total_export_china / total_export) 
 
+# Plotting
+taiwan_china_pct %>% left_join(china_taiwan, by = "year") %>% 
+  gather(pct_trade, value, pct_taiwan_export, pct_china_export) %>% 
+  ggplot(aes(year, value, color = pct_trade)) +
+  geom_point() + 
+  geom_line() + 
+  scale_y_continuous(labels = percent_format()) +
+  theme(legend.position = "top", 
+        legend.title = element_blank()) +
+  scale_color_discrete(labels = c("% of China's export to Taiwan", "% of Taiwan's export to China")) +
+  labs(title = "Figure. Uneven Reliance", 
+       subtitle = "Trade data shows Taiwan needs China (a lot) more", 
+       x = "", 
+       y = "", 
+       caption = "Source: Ministry of Finance, ROC; China Statistics Yearbook")
+
+```
+
+```{r}
+library(haven)
+
+taiwan_security <- read_sav("2019_TNSS/PP199711.sav")
+```
+
+```{r}
+taiwan_security %>% View()
 ```
 
