@@ -43,12 +43,22 @@ taiwan_china_pct %>% left_join(china_taiwan, by = "year") %>%
 
 ```
 
+# Analyzing TNSS focusing on changing perceptions of the China threat and its implications for attitudes toward future independence
 ```{r}
 library(haven)
 library(janitor)
 
 taiwan_security_2019 <- read_sav("2019_TNSS/PP199711.sav") %>% clean_names()
 taiwan_security_2017 <- read_sav("2017_TNSS/PP1797B1(ƒ¿•X™©) (1).sav") %>% clean_names()
+taiwan_security_2016 <- read_sav("2016_TNSS/PP1697B1(釋出版)加權.sav") %>% clean_names()
+taiwan_security_2015 <- read_sav("2015_TNSS/Sav/PP1597A1.sav") %>% clean_names()
+taiwan_security_2013 <- read_sav("2013_TNSS/PP1397B1.sav") %>% clean_names()
+taiwan_security_2012 <- read_sav("2012_TNSS/2012/PP1297A5.sav") %>% clean_names()
+taiwan_security_2011 <- read_sav("2011_TNSS/2011/PP119721.sav") %>% clean_names() 
+taiwan_security_2008 <- read_sav("2008_TNSS/2008/PP089721.sav") %>% clean_names()
+taiwan_security_2005 <- read_sav("2005_TNSS/2005/pp059752.sav") %>% clean_names()
+taiwan_security_2004 <- read_sav("2004_TNSS/2004/PT049750.sav") %>% clean_names()
+taiwan_security_2003 <- read_sav("2002_TNSS/2003/pt0297c4.sav") %>% clean_names()
 ```
 
 ```{r}
