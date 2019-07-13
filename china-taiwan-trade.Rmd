@@ -45,11 +45,40 @@ taiwan_china_pct %>% left_join(china_taiwan, by = "year") %>%
 
 ```{r}
 library(haven)
+library(janitor)
 
-taiwan_security <- read_sav("2019_TNSS/PP199711.sav")
+taiwan_security_2019 <- read_sav("2019_TNSS/PP199711.sav") %>% clean_names()
+taiwan_security_2017 <- read_sav("2017_TNSS/PP1797B1(ƒ¿•X™©) (1).sav") %>% clean_names()
 ```
 
 ```{r}
-taiwan_security %>% View()
+taiwan_security_2019 %>% select(date, q8, q9, q14) %>% 
+  mutate(q8 = factor(q8, levels = 1:4, 
+                     labels = c("strongly oppose", "oppose", "support", "strongly support")), 
+         q8 = fct_explicit_na(q8, na_level = "Non-reaction")) %>%
+  mutate(q9 = factor(q9, levels = 1:4, 
+                     labels = c("strongly oppose", "oppose", "support", "strongly support")), 
+         q9 = fct_explicit_na(q9, na_level = "Non-reaction")) %>% 
+  mutate(q14 = factor(q14, levels = 1:4, 
+                      labels = c("Very unlikely", "Unlikely", "Likely", "Very likely")), 
+         q14 = fct_explicit_na(q14, na_level = "Non-reaction")) %>% 
+  rename(attack_ind_support = q8,
+         no_attack_ind_support = q9, 
+         ind_cause_attack = q14) 
+
+taiwan_security_2017 %>% select(date, q14, q15, q9) %>% 
+  mutate(q14 = factor(q14, levels = 1:4, 
+                     labels = c("strongly oppose", "oppose", "support", "strongly support")), 
+         q14 = fct_explicit_na(q14, na_level = "Non-reaction")) %>%
+  mutate(q15 = factor(q15, levels = 1:4, 
+                     labels = c("strongly oppose", "oppose", "support", "strongly support")), 
+         q15 = fct_explicit_na(q15, na_level = "Non-reaction")) %>% 
+  mutate(q9 = factor(q9, levels = 1:4, 
+                      labels = c("Very unlikely", "Unlikely", "Likely", "Very likely")), 
+         q9 = fct_explicit_na(q9, na_level = "Non-reaction")) %>% 
+  rename(attack_ind_support = q14,
+         no_attack_ind_support = q15, 
+         ind_cause_attack = q9) 
+  
 ```
 
