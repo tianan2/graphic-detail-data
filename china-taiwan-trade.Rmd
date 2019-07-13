@@ -72,9 +72,19 @@ taiwan_security_2019 %>% select(date, q8, q9, q14) %>%
   mutate(q14 = factor(q14, levels = 1:4, 
                       labels = c("Very unlikely", "Unlikely", "Likely", "Very likely")), 
          q14 = fct_explicit_na(q14, na_level = "Non-reaction")) %>% 
-  rename(attack_ind_support = q8,
-         no_attack_ind_support = q9, 
-         ind_cause_attack = q14) 
+  rename(attack_ind = q8,
+         no_attack_ind = q9, 
+         ind_cause_attack = q14) %>% 
+  gather(question, answer, attack_ind, no_attack_ind) %>% 
+  count(question, answer, sort = T) %>% 
+  ggplot(aes(answer, n)) +
+  geom_col() +
+  coord_flip() +
+  facet_wrap(~ question) + 
+  labs(title = "Conditional preference for independence", 
+       x = "", 
+       y = "# of respondents", 
+       caption = "Source: Taiwan National Security Survey (https://sites.duke.edu/pass/taiwan-national-security-survey/)")
 
 taiwan_security_2017 %>% select(date, q14, q15, q9) %>% 
   mutate(q14 = factor(q14, levels = 1:4, 
@@ -86,9 +96,104 @@ taiwan_security_2017 %>% select(date, q14, q15, q9) %>%
   mutate(q9 = factor(q9, levels = 1:4, 
                       labels = c("Very unlikely", "Unlikely", "Likely", "Very likely")), 
          q9 = fct_explicit_na(q9, na_level = "Non-reaction")) %>% 
-  rename(attack_ind_support = q14,
-         no_attack_ind_support = q15, 
+  rename(attack_ind = q14,
+         no_attack_ind = q15, 
          ind_cause_attack = q9) 
   
+```
+
+# Question regarding the attitude toward economic relationship with mainland
+```{r}
+econ_2019 <- taiwan_security_2019 %>% select(date, q3) %>% 
+  mutate(q3 = factor(q3, levels = 1:2, 
+                     labels = c("strengthen", "weaken")), 
+         q3 = fct_explicit_na(q3, na_level = "Non-reaction")) %>% 
+  rename(econ_relations = q3) %>% 
+  mutate(year = 2019)
+
+econ_2017 <- taiwan_security_2017 %>% select(date, q3) %>% 
+  mutate(q3 = factor(q3, levels = 1:2, 
+                     labels = c("strengthen", "weaken")), 
+         q3 = fct_explicit_na(q3, na_level = "Non-reaction")) %>% 
+  rename(econ_relations = q3) %>% 
+  mutate(year = 2017)
+
+econ_2016 <- taiwan_security_2016 %>% select(date, q3) %>% 
+  mutate(q3 = factor(q3, levels = 1:2, 
+                     labels = c("strengthen", "weaken")), 
+         q3 = fct_explicit_na(q3, na_level = "Non-reaction")) %>% 
+  rename(econ_relations = q3) %>% 
+  mutate(year = 2016)
+
+econ_2015 <- taiwan_security_2015 %>% select(date, q3) %>% 
+  mutate(q3 = factor(q3, levels = 1:2, 
+                     labels = c("strengthen", "weaken")), 
+         q3 = fct_explicit_na(q3, na_level = "Non-reaction")) %>% 
+  rename(econ_relations = q3) %>% 
+  mutate(year = 2015)
+
+econ_2013 <- taiwan_security_2013 %>% select(date, q7) %>% 
+  mutate(q7 = factor(q7, levels = 1:2, 
+                     labels = c("strengthen", "weaken")), 
+         q7 = fct_explicit_na(q7, na_level = "Non-reaction")) %>% 
+  rename(econ_relations = q7) %>% 
+  mutate(year = 2013)
+
+econ_2012 <- taiwan_security_2012 %>% select(date, q7) %>% 
+  mutate(q7 = factor(q7, levels = 1:2, 
+                     labels = c("strengthen", "weaken")), 
+         q7 = fct_explicit_na(q7, na_level = "Non-reaction")) %>% 
+  rename(econ_relations = q7) %>% 
+  mutate(year = 2012)
+
+econ_2011 <- taiwan_security_2011 %>% select(date, q7) %>% 
+  mutate(q7 = factor(q7, levels = 1:2, 
+                     labels = c("strengthen", "weaken")), 
+         q7 = fct_explicit_na(q7, na_level = "Non-reaction")) %>% 
+  rename(econ_relations = q7) %>% 
+  mutate(year = 2011)
+
+econ_2008 <- taiwan_security_2008 %>% select(date, q3) %>% 
+  mutate(q3 = factor(q3, levels = 1:2, 
+                     labels = c("strengthen", "weaken")), 
+         q3 = fct_explicit_na(q3, na_level = "Non-reaction")) %>% 
+  rename(econ_relations = q3) %>% 
+  mutate(year = 2008)
+
+econ_2005 <- taiwan_security_2005 %>% select(date, q3) %>% 
+  mutate(q3 = factor(q3, levels = 1:2, 
+                     labels = c("strengthen", "weaken")), 
+         q3 = fct_explicit_na(q3, na_level = "Non-reaction")) %>% 
+  rename(econ_relations = q3) %>% 
+  mutate(year = 2005)
+
+econ_2004 <- taiwan_security_2004 %>% select(date, q5) %>% 
+  mutate(q5 = factor(q5, levels = 1:2, 
+                     labels = c("strengthen", "weaken")), 
+         q5 = fct_explicit_na(q5, na_level = "Non-reaction")) %>% 
+  rename(econ_relations = q5) %>% 
+  mutate(year = 2004)
+
+econ_years <- econ_2004 %>% bind_rows(econ_2005) %>% bind_rows(econ_2008) %>% bind_rows(econ_2011) %>% bind_rows(econ_2012) %>% bind_rows(econ_2013) %>% bind_rows(econ_2015) %>% bind_rows(econ_2016) %>% bind_rows(econ_2017) %>% bind_rows(econ_2019)
+
+library(lubridate)
+
+econ_years %>% mutate(year = as.character(year)) %>% 
+  group_by(year) %>% 
+  count(econ_relations) %>% 
+  mutate(pct = n / sum(n)) %>% 
+  ggplot(aes(year, pct, fill = econ_relations)) +
+  geom_col() + 
+  scale_y_continuous(labels = scales::percent_format()) +
+  theme(legend.position = "top", 
+        legend.title = element_blank()) +
+  labs(title = "Do you think Taiwan should strenghten its economic relations with China?", 
+       x = "", 
+       y = "", 
+       caption = "Source: Taiwan National Security Survery")
+```
+# How likely Taiwanese think China will take military action upon the declaration of independence?
+```{r}
+
 ```
 
