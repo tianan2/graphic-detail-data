@@ -1,0 +1,38 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+library(readxl)
+theme_set(theme_minimal())
+options(scipen = 999)
+
+hongkong_tourism <- read_excel("china-hongkong-tourism.xlsx") %>% mutate(pct_exp = exp_mainland / exp_total)
+```
+
+```{r}
+hongkong_tourism %>% 
+  ggplot(aes(year, visitors_mainland)) +
+  geom_point() +
+  geom_line() + 
+  scale_x_continuous(limits = c(1995, 2017), 
+                     breaks = seq(1995, 2017, 2))
+
+```
+
+```{r}
+hongkong_tourism %>% 
+  filter(year > 1999) %>% 
+  ggplot(aes(year, pct_exp)) + 
+  geom_point() +
+  geom_line() + 
+  expand_limits(y = 0.1) + 
+  scale_y_continuous(labels = scales::percent_format())
+```
+
