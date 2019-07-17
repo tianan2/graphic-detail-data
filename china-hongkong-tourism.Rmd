@@ -27,7 +27,7 @@ g <- hongkong_tourism %>%
   scale_y_continuous(limits = c(0, 50000), 
                      breaks = seq(0, 50000, 10000), 
                      labels = c("0", "10M", "20M", "30M", "40M", "50M")) + 
-  labs(title = "Most Valuable Visitors", 
+  labs(title = "MOST VALUABLE VISITORS", 
        subtitle = "Blue (left scale), Red (right scale)", 
        x = "", 
        y = "", 
@@ -38,6 +38,8 @@ g + geom_line(data = hongkong_tourism_pct, aes(year, pct_exp * 60000), size = 1.
                      breaks = seq(0, 50000, 10000), 
                      labels = c("0", "10M", "20M", "30M", "40M", "50M"), 
                      sec.axis = sec_axis(~ . / 60000, name = "% of mainlanders' expenditure in total consumption")) + 
+  theme_bw() +
+  theme(plot.title = element_text(size = 15)) +
   labs(y = "# of visitors from mainland")
 
 ```
@@ -65,5 +67,21 @@ hongkong_tourism_pct %>%
 
 ```{r}
 hongkong_realestate <- read_excel("his_data_2.xls", col_names = FALSE, skip = 3)
+```
+
+```{r}
+library(rvest)
+library(janitor)
+
+hongkong_poll_page <- read_html("https://www.pori.hk/nationalissues/octs2taiwan")
+
+hongkong_poll <- hongkong_poll_page %>% 
+  html_node("table") %>% 
+  html_table(header = NA) %>% 
+  tbl_df() 
+
+names(hongkong_poll) <- list("date", "total_sample", "sub_sample", "applicable", "not_applicable", "not_sure", "total", "net_value")
+
+hongkong_poll <- hongkong_poll[-1, ]
 ```
 
