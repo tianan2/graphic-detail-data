@@ -100,6 +100,35 @@ taiwan_security_2017 %>% select(date, q14, q15, q9) %>%
          no_attack_ind = q15, 
          ind_cause_attack = q9) 
   
+
+
+```
+
+```{r}
+taiwan_security_2019 %>% select(date, q8, q9, q14) %>% 
+  mutate(q8 = factor(q8, levels = 1:4, 
+                     labels = c("strongly oppose", "oppose", "support", "strongly support")), 
+         q8 = fct_explicit_na(q8, na_level = "Non-reaction")) %>%
+  mutate(q9 = factor(q9, levels = 1:4, 
+                     labels = c("strongly oppose", "oppose", "support", "strongly support")), 
+         q9 = fct_explicit_na(q9, na_level = "Non-reaction")) %>% 
+  mutate(q14 = factor(q14, levels = 1:4, 
+                      labels = c("Very unlikely", "Unlikely", "Likely", "Very likely")), 
+         q14 = fct_explicit_na(q14, na_level = "Non-reaction")) %>% 
+  rename(attack_ind = q8,
+         no_attack_ind = q9, 
+         ind_cause_attack = q14) %>%  
+  gather(question, answer, attack_ind, no_attack_ind) %>% 
+  count(question, answer, ind_cause_attack, sort = T) %>% 
+  ggplot(aes(answer, n, fill = ind_cause_attack)) +
+  geom_col() +
+  coord_flip() +
+  scale_fill_discrete(name = "Chance of attack") +
+  facet_wrap(~ question) +
+  labs(title = "Conditional preference for independence", 
+       x = "", 
+       y = "# of respondents", 
+       caption = "Source: Taiwan National Security Survey (https://sites.duke.edu/pass/taiwan-national-security-survey/)")
 ```
 
 # Question regarding the attitude toward economic relationship with mainland
@@ -193,6 +222,7 @@ econ_years %>% mutate(year = as.character(year)) %>%
        caption = "Source: Taiwan National Security Survery")
 ```
 # How likely Taiwanese think China will take military action upon the declaration of independence?
+
 ```{r}
 
 ```

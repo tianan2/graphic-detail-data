@@ -113,7 +113,7 @@ hongkong_confidence_clean %>%
          Response = fct_rev(Response)) %>% 
   ggplot(aes(date_of_survey, value, color = Response)) +
   geom_line(size = 1) + 
-  geom_vline(xintercept = as.Date(c("2008-08-01", "2014-04-01")), linetype = "dashed") +
+  geom_vline(xintercept = as.Date(c("1997-07-01", "2008-08-01", "2014-04-01")), linetype = "dashed") +
   scale_y_continuous(limits = c(-0.25, 0.8), 
                      breaks = seq(-0.25, 0.8, 0.1), 
                      labels = scales::percent) +
