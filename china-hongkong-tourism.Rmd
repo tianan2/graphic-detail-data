@@ -21,7 +21,7 @@ hongkong_tourism <- read_excel("china-hongkong-tourism.xlsx") %>% mutate(pct_exp
 ```{r}
 g <- hongkong_tourism %>% 
   ggplot(aes(year, visitors_mainland)) +
-  geom_line(size = 1.3, color = "blue") + 
+  geom_line(size = 1.3) + 
   scale_x_continuous(limits = c(1995, 2017), 
                      breaks = seq(1995, 2017, 2)) +
   scale_y_continuous(limits = c(0, 50000), 
@@ -33,7 +33,7 @@ g <- hongkong_tourism %>%
        y = "", 
        captions = "Source: Hong Kong Annual Digest of Statistics")
 
-g + geom_line(data = hongkong_tourism_pct, aes(year, pct_exp * 60000), size = 1.3, color = "red") + 
+g + geom_line(data = hongkong_tourism_pct, aes(year, pct_exp * 60000), size = 1.3, color = "gray") + 
   scale_y_continuous(limits = c(0, 50000), 
                      breaks = seq(0, 50000, 10000), 
                      labels = c("0", "10M", "20M", "30M", "40M", "50M"), 
@@ -42,6 +42,15 @@ g + geom_line(data = hongkong_tourism_pct, aes(year, pct_exp * 60000), size = 1.
   theme(plot.title = element_text(size = 15)) +
   labs(y = "# of visitors from mainland")
 
+hongkong_tourism %>% 
+  select(-exp_mainland, -exp_total) %>%
+  gather(metric, value, -year) %>% 
+  ggplot(aes(year, value)) + 
+  geom_point() +
+  geom_line() +
+  facet_wrap(~ metric, scales = "free_y")
+  
+  
 ```
 
 ```{r}
@@ -83,5 +92,39 @@ hongkong_poll <- hongkong_poll_page %>%
 names(hongkong_poll) <- list("date", "total_sample", "sub_sample", "applicable", "not_applicable", "not_sure", "total", "net_value")
 
 hongkong_poll <- hongkong_poll[-1, ]
+```
+
+```{r}
+library(lubridate)
+
+hongkong_confidence <- read_excel("hongkong-confidence-one-country-two-systems.xlsx") %>% clean_names() 
+
+hongkong_confidence_clean <- hongkong_confidence %>% 
+  mutate(date_of_survey = dmy(date_of_survey)) %>% 
+  select(-effective_sample_size, -sub_sample) %>% 
+  mutate(confident = as.numeric(str_trim(str_replace(confident, "\\%", ""))), 
+         not_confident = as.numeric(str_trim(str_replace(not_confident, "\\%", ""))), 
+         dk_hs = as.numeric(str_trim(str_replace(dk_hs, "\\%", ""))), 
+         net_value = as.numeric(str_trim(str_replace(net_value, "\\%", ""))))
+
+hongkong_confidence_clean %>% 
+  gather(Response, value, confident, not_confident, net_value) %>% 
+  mutate(value = value / 100, 
+         Response = fct_rev(Response)) %>% 
+  ggplot(aes(date_of_survey, value, color = Response)) +
+  geom_line(size = 1) + 
+  geom_vline(xintercept = as.Date(c("2008-08-01", "2014-04-01")), linetype = "dashed") +
+  scale_y_continuous(limits = c(-0.25, 0.8), 
+                     breaks = seq(-0.25, 0.8, 0.1), 
+                     labels = scales::percent) +
+  theme(plot.title = element_text(size = 15, face = "bold"), 
+        legend.position = "bottom") +
+  labs(title = "Confidence crisis?", 
+       subtitle = "Question: Do you have confidence in 'one country, two systems'?",
+       x = "", 
+       y = "", 
+       caption = "Data from HKU Public Opinion Program")
+  
+  
 ```
 
