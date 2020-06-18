@@ -96,8 +96,14 @@ hongkong_poll <- hongkong_poll[-1, ]
 
 ```{r}
 library(lubridate)
+library(ggrepel)
 
 hongkong_confidence <- read_excel("hongkong-confidence-one-country-two-systems.xlsx") %>% clean_names() 
+
+key_junctures <- tibble(
+  dates = c("1997-07-01", "2003-07-01", "2008-08-01", "2014-06-01"), 
+  events = c("Return", "State Security Law", "Beijing Olympic", "Umbrella Movement")
+)
 
 hongkong_confidence_clean <- hongkong_confidence %>% 
   mutate(date_of_survey = dmy(date_of_survey)) %>% 
@@ -113,7 +119,7 @@ hongkong_confidence_clean %>%
          Response = fct_rev(Response)) %>% 
   ggplot(aes(date_of_survey, value, color = Response)) +
   geom_line(size = 1) + 
-  geom_vline(xintercept = as.Date(c("1997-07-01", "2008-08-01", "2014-04-01")), linetype = "dashed") +
+  geom_vline(xintercept = as.Date(key_junctures$dates), linetype = "dashed") +
   scale_y_continuous(limits = c(-0.25, 0.8), 
                      breaks = seq(-0.25, 0.8, 0.1), 
                      labels = scales::percent) +
