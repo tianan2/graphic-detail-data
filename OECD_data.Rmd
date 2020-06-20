@@ -7,17 +7,40 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r message=TRUE, warning=TRUE}
+```{r message=FALSE, warning=FALSE}
 library(tidyverse)
 library(janitor)
 library(scales)
 theme_set(theme_light())
 options(scipen = 999)
 
-immigration_flow <- read_csv("oecd_immigration-flow_full.csv") %>% clean_names()
+immigration_flow <- read_csv("oecd_immigration-flow_full.csv") %>% clean_names() %>% mutate(time = as.character(time))
+```
+
+# Exploring dataset
+
+```{r}
+immigration_flow %>% 
+  count(location, sort = T)
+
+immigration_flow %>% 
+  count(time, sort = T)
+
+immigration_flow %>% 
+  count(subject, sort = T)
+
+# general trend in the number of flow
+immigration_flow %>% 
+  filter(time > 2002) %>% 
+  group_by(time, subject) %>% 
+  summarize(total = sum(value)) %>% 
+  ggplot(aes(time, total, fill = subject)) +
+  geom_col()
+
 ```
 
 # Total of # of immigrants in 2016
+
 ```{r}
 immigration_flow %>% 
   filter(time == 2016) %>%
